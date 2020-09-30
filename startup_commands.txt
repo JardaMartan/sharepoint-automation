@@ -1,0 +1,22 @@
+development database (dynamodb):
+docker run -p 8000:8000 amazon/dynamodb-local
+
+NGROK:
+ngrok http 5050
+
+Flask:
+dotenv -f .env_local run python sharepoint_bot.py
+
+Interactive:
+dotenv -f .env_local run python -i sp_interactive.py
+
+DDB Object:
+dotenv -f .env_local run python -i ddb_single_table_obj.py
+
+Tests:
+python -m unittest test_button_bot.BotTest.test_create_registration_form
+
+PIP update:
+pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U
+
+https://50ca33ce.ngrok.io/o365auth
