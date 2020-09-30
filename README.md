@@ -1,3 +1,5 @@
+The Sharepoint automation Bot is designed to run in Amazon Lambda. It's using DynamoDB to store its data and runs in Flask. In development mode it can run locally as DynamoDB is provided as a Docker container and Flask can be started in development mode.
+
 ## Installing & running locally
 ### Requirements:
 * Docker installed
