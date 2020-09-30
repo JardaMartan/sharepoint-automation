@@ -407,14 +407,22 @@ URL and generate a new access token.""".format(bot_email))
 
     ddb = DDB_Single_Table()
 
+"""
+Main function which handles the webhook events. It reacts both on messages and button&card events
+
+Look at the 'msg +=' for workflow explanation
+"""
+
 @task
 def handle_webhook_event(webhook):
     action_list = []
     if webhook["data"].get("personEmail") != bot_email:
         flask_app.logger.info(json.dumps(webhook))
         pass
+        
+# handle Bot's membership events (Bot added/removed from Space or 1-1 communication)
     if webhook["resource"] == "memberships":
-        msg = ""
+        msg = "" # a response message that is sent back to the user/space. Now it's used mainly for debugging.
         if webhook["data"]["personEmail"] == bot_email:
             if webhook["event"] == "created":
                 personal_room = is_room_direct(webhook["data"]["roomId"])
@@ -461,6 +469,9 @@ def handle_webhook_event(webhook):
     target_dict = {"roomId": webhook["data"]["roomId"]}
     form_type = None
     out_messages = [] # additional messages apart of the standard response
+    
+# handle messages
+# currently the Bot acts on 'authorize' and 'space' commands. The rest is for testing.
     if webhook["resource"] == "messages":
         if webhook["data"]["personEmail"] == bot_email:
             flask_app.logger.debug("Ignoring my own message")
@@ -526,6 +537,12 @@ def handle_webhook_event(webhook):
                 
             if msg != "" or len(attach) > 0:
                 out_messages.append({"message": msg, "attachments": attach, "target": target_dict, "form_type": form_type})
+                
+# handle buttons&cards events
+# the event information contains the message ID in which the card was originally posted
+# so in order to follow the context the message ID has to be stored when the card is posted to a space
+# see 'save_form_info()'
+# this way we can not only gather the card data but also get the information to which card the user is responding
     elif webhook["resource"] == "attachmentActions":
         try:
             spk_headers = {
@@ -929,7 +946,11 @@ def delete_form_data_for_user(form_id, user_id):
     
 def secure_scheme(scheme):
     return re.sub(r"^http$", "https", scheme)
-        
+
+"""
+Bot setup. Used mainly for webhook creation and gathering a dynamic Bot URL.
+"""
+
 @flask_app.route("/", methods=["GET", "POST"])
 def spark_webhook():
     if request.method == "POST":
@@ -952,6 +973,10 @@ def spark_webhook():
         
     flask_app.logger.debug("Webhook handling done.")
     return("OK")
+    
+"""
+Startup procedure used to initiate @flask_app.before_first_request
+"""
 
 @flask_app.route("/startup")
 def startup():
@@ -959,6 +984,8 @@ def startup():
 
 """
 Webex Teams OAuth grant flow start
+
+it's not used by this Bot
 """
 @flask_app.route("/authorize", methods=["GET"])
 def authorize():
