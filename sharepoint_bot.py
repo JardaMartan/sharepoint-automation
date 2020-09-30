@@ -1,4 +1,4 @@
-#!/bin/#!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -121,14 +121,17 @@ SAMPLE_AUTH_FORM = {
                             {
                                 "type": "TextBlock",
                                 "text": "O365 Authentication Valid",
+                                "wrap": True,
                             },
                             {
                                 "type": "TextBlock",
                                 "text": "O365 Authorization Status for Org",
+                                "wrap": True,
                             },
                             {
                                 "type": "TextBlock",
                                 "text": "O365 Authorization Status for individual",
+                                "wrap": True,
                             },
                         ]
                     },
@@ -265,7 +268,10 @@ def nested_replace( structure, original, new ):
         return {key : nested_replace(value, original, new)
                      for key, value in structure.items() }
 
-    return structure.replace("{{"+original+"}}", new)
+    if type(structure) == str:
+        return structure.replace("{{"+original+"}}", new)
+    else:
+        return structure
 
 def save_tokens(user_email, tokens):
     flask_app.logger.debug("AT timestamp: {}".format(tokens.expires_at))
